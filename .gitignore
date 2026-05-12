@@ -1,0 +1,6 @@
+raw/
+meshes/
+preview.png
+__pycache__/
+*.pyc
+.venv/

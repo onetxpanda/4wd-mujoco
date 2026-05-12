@@ -116,6 +116,37 @@ each wheel body's mass and inertia come from the visual mesh, which is
 asymmetric along the axle (the motor housing sits behind the wheel disc)
 and therefore correctly off-center.
 
+## Reinforcement learning (MJX + brax PPO)
+
+`rl/` ships an MJX port of the MJCF wrapped as two brax-compatible envs:
+
+  * **`DriveToGoal`** — drive to a random xy goal (1-3 m, random heading)
+  * **`VelocityTracking`** — track a body-frame `(vx, omega_z)` command
+
+Both share `DDSM115Base` (in `rl/base.py`), which loads `ddsm115_4wd.xml`,
+puts it on the MJX device, and steps `n_frames=10` physics substeps per env
+step (50 Hz control on top of the 0.002 s integrator). Action is 4-d in
+`[-1, 1]` and scaled internally to the motor `ctrlrange="-3 3"`. Base
+observation (15-d) is orientation, height, body-frame linear + angular
+velocity, and wheel angular velocities; each task appends a 2-d slice
+(goal vector or command), giving a 17-d observation.
+
+The colab notebook at `notebooks/train_colab.ipynb` installs pinned
+versions (`jax==0.4.35`, `brax==0.10.5`, `mujoco-mjx==3.2.7`), clones this
+branch, and trains each task with brax PPO. On a Colab T4, a 10 M-step run
+fits in a few minutes per task and produces a working policy. The notebook
+also rolls the trained policy out in CPU MuJoCo and renders a short clip
+with `mediapy`.
+
+Quick local smoke-test (CPU, slow):
+
+```
+python3 -m rl.test_envs
+```
+
+That JIT-compiles both envs, runs a 50-step rollout, and prints per-step
+wall-clock time so you can spot regressions.
+
 ## Gotchas worth remembering
 
   * The four wheel local-Y axes do not all point the same direction in the

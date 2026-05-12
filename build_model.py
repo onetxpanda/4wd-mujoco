@@ -14,8 +14,10 @@ MJCF conventions (from the spec):
   * wheels: child bodies at component placement, hinge joint axis="0 1 0"
     (wheel-local Y == real axle), visual mesh + a thin cylinder collider
     rotated by quat "0.7071068 0.7071068 0 0" so its axis aligns with body-Y
-  * default classes: chassis (contype=1 density=500), wheel_visual (contype=0
-    density=0), wheel_collision (contype=1 density=800 friction=1.2 0.01 0.001)
+  * default classes: chassis (contype=1 density=2000), wheel_visual (contype=0
+    density=600 -- the visual mesh includes the heavy DDSM115 motor housing,
+    so it carries the wheel-assembly mass), wheel_collision (contype=1
+    density=0 -- pure collider, no mass; friction=1.2 0.01 0.001).
   * 4 motor actuators ctrlrange="-3 3", gear=-1 on the two left motors so
     ctrl=+1 on all four drives forward
   * sensors: jointvel per wheel + framepos/framequat on base_link
@@ -174,21 +176,30 @@ def build(meshes_dir: str, out_xml: str, assets_dir: str) -> None:
         "integrator": "implicitfast",
     })
 
+    # Densities chosen to hit the real-robot total of ~3.7 kg:
+    #   * chassis = 2000 kg/m^3 (aluminum-ish; the 2020 extrusions and plates
+    #     are aluminum but the meshes lump some hollow space into the legacy
+    #     volume estimate, so 2000 < pure aluminum 2700 keeps the total honest)
+    #   * wheel_visual = 600 kg/m^3 (the wheel mesh includes the heavy DDSM115
+    #     motor housing -- this density gives ~0.42 kg per wheel assembly,
+    #     matching the datasheet motor mass)
+    #   * wheel_collision = 0 kg/m^3 (cylinder is a pure collider; the mass
+    #     and inertia of the wheel come from the visual mesh)
     default = ET.SubElement(mujoco, "default")
     chassis = ET.SubElement(default, "default", {"class": "chassis"})
     ET.SubElement(chassis, "geom", {
         "type": "mesh", "contype": "1", "conaffinity": "1",
-        "density": "500", "rgba": "0.55 0.55 0.6 1",
+        "density": "2000", "rgba": "0.55 0.55 0.6 1",
     })
     wv = ET.SubElement(default, "default", {"class": "wheel_visual"})
     ET.SubElement(wv, "geom", {
         "type": "mesh", "contype": "0", "conaffinity": "0",
-        "density": "0", "rgba": "0.15 0.15 0.15 1",
+        "density": "600", "rgba": "0.15 0.15 0.15 1",
     })
     wc = ET.SubElement(default, "default", {"class": "wheel_collision"})
     ET.SubElement(wc, "geom", {
         "type": "cylinder", "contype": "1", "conaffinity": "1",
-        "density": "800", "friction": "1.2 0.01 0.001",
+        "density": "0", "friction": "1.2 0.01 0.001",
         "rgba": "0.1 0.1 0.1 0.3",
     })
 

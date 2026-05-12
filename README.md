@@ -71,9 +71,15 @@ component. `assembly.json` records each component's `raw_name`, `proto_name`,
 
 | class            | type     | contype | density | friction          |
 |------------------|----------|---------|---------|-------------------|
-| `chassis`        | mesh     | 1       | 500     | (default)         |
-| `wheel_visual`   | mesh     | 0       | 0       | (default)         |
-| `wheel_collision`| cylinder | 1       | 800     | 1.2 0.01 0.001    |
+| `chassis`        | mesh     | 1       | 2000    | (default)         |
+| `wheel_visual`   | mesh     | 0       | 600     | (default)         |
+| `wheel_collision`| cylinder | 1       | 0       | 1.2 0.01 0.001    |
+
+The DDSM115 hub motors are heavy (~0.4 kg each per datasheet) and the frame
+is aluminum, so the densities are picked to land the total mass near the
+real-robot 3.7 kg: the wheel mesh -- which already includes the motor
+housing -- carries the wheel-assembly mass via `wheel_visual` density, and
+the cylinder collider is mass-less (it exists only for stable contact).
 
 ### Drive convention
 
@@ -104,11 +110,11 @@ ctrl[wheel_bl] = -1
   * `ctrl=[1,1,1,1]` -> base translates along +Y
   * right=+1, left=-1 -> positive yaw rate about +Z
 
-Mass with the spec densities (chassis 500, wheel collision 800, wheel visual
-0) and the default MuJoCo mesh inertia mode comes out around 1.4 kg. Hitting
-the real-robot mass of ~3.7 kg would require either a higher chassis density
-(aluminum ~2700) or a non-zero `wheel_visual` density to count the motor
-housing in the wheel mesh; the spec densities are kept as-is here.
+With the chosen densities the compiled model lands at ~3.74 kg: chassis
+~2.07 kg, each wheel assembly ~0.42 kg. The cylinder collider is mass-less;
+each wheel body's mass and inertia come from the visual mesh, which is
+asymmetric along the axle (the motor housing sits behind the wheel disc)
+and therefore correctly off-center.
 
 ## Gotchas worth remembering
 

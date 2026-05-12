@@ -4,13 +4,13 @@
   <option timestep="0.002" integrator="implicitfast"/>
   <default>
     <default class="chassis">
-      <geom type="mesh" contype="1" conaffinity="1" density="500" rgba="0.55 0.55 0.6 1"/>
+      <geom type="mesh" contype="1" conaffinity="1" density="2000" rgba="0.55 0.55 0.6 1"/>
     </default>
     <default class="wheel_visual">
-      <geom type="mesh" contype="0" conaffinity="0" density="0" rgba="0.15 0.15 0.15 1"/>
+      <geom type="mesh" contype="0" conaffinity="0" density="600" rgba="0.15 0.15 0.15 1"/>
     </default>
     <default class="wheel_collision">
-      <geom type="cylinder" contype="1" conaffinity="1" density="800" friction="1.2 0.01 0.001" rgba="0.1 0.1 0.1 0.3"/>
+      <geom type="cylinder" contype="1" conaffinity="1" density="0" friction="1.2 0.01 0.001" rgba="0.1 0.1 0.1 0.3"/>
     </default>
   </default>
   <asset>
